@@ -6,9 +6,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ChatConfig
 {
-    @Value( "${openai.baseUrl}" )
+    @Value( "${openai.baseUrl:}" )
     String baseUrl;
 
-    @Value( "${openai.apiKey}" )
+    @Value( "${openai.apiKey:}" )
     String apiKey;
 }
