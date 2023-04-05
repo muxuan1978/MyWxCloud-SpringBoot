@@ -52,14 +52,17 @@ public class OpenAIUtils
             String message =  result.getChoices().get( 0 ).getMessage().getContent();
             if (StrUtil.isNotEmpty(message))
             {
-                String wxResult = JSONUtil.createObj()
+                String wxMessage = JSONUtil.createObj()
                         .putOnce( "touser", openId )
                         .putOnce( "msgtype", WxConstant.MsgType.TEXT )
                         .putOnce( "text", JSONUtil.createObj().putOnce( "content", message ) )
                         .toString();
-                HttpRequest.post( "http://api.weixin.qq.com/cgi-bin/message/custom/send" )
-                        .body( wxResult )
-                        .execute();
+                logger.info( "wechat request : " + wxMessage );
+                String wxResult = HttpRequest.post( "http://api.weixin.qq.com/cgi-bin/message/custom/send" )
+                        .body( wxMessage )
+                        .execute()
+                        .body();
+                logger.info( "wechat result : " + wxResult );
             }
             return "";
         }
