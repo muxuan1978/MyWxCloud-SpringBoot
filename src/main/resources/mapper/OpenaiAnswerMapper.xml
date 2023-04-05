@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tencent.wxcloudrun.dao.OpenaiAnswerMapper">
+
+    <resultMap id="OpenaiAnswerMapper" type="com.tencent.wxcloudrun.model.OpenaiAnswer">
+        <id property="id" column="id"/>
+        <result property="openId" column="open_id"/>
+        <result property="question" column="question"/>
+        <result property="answer" column="answer"/>
+        <result property="readed" column="readed"/>
+
+        <result property="createTime" column="create_time" javaType="java.time.LocalDateTime" />
+        <result property="readTime" column="read_time" javaType="java.time.LocalDateTime"  />
+    </resultMap>
+
+    <insert id="insertQuestion" parameterType="com.tencent.wxcloudrun.model.OpenaiAnswer">
+        INSERT INTO `openai_answer`(`id`, `open_id`, `question`, `readed`)
+        VALUE(#{id}, #{openId}, #{question}, 0)
+    </insert>
+
+    <update id="updateAnswer" parameterType="com.tencent.wxcloudrun.model.OpenaiAnswer">
+        Update openai_answer set answer = #{answer}, readed = 1 where id = #{id}
+    </update>
+
+    <select id="selectUnReaded" resultMap="OpenaiAnswerMapper" parameterType="java.lang.String">
+        SELECT `id`, `open_id`, `question`, `answer`
+        FROM openai_answer
+        WHERE open_id = #{openId} and readed = 1
+    </select>
+
+    <update id="updateReadFlag"  parameterType="java.lang.String">
+        Update openai_answer set readed = 2
+        WHERE open_id = #{openId} and readed = 1
+    </update>
+
+
+</mapper>

@@ -14,7 +14,7 @@ spring:
 
 openai:
   baseUrl: http://ec2-52-15-239-174.us-east-2.compute.amazonaws.com:9877
-  apiKey: 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
+  apiKey: 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
 
 
 mybatis:

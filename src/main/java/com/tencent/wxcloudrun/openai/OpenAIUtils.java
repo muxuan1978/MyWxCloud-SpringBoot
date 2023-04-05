@@ -7,7 +7,9 @@ import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.tencent.wxcloudrun.config.WxConstant;
+import com.tencent.wxcloudrun.dao.OpenaiAnswerMapper;
 import com.tencent.wxcloudrun.dto.WxMessageResult;
+import com.tencent.wxcloudrun.model.OpenaiAnswer;
 import com.tencent.wxcloudrun.openai.common.ChatConfig;
 import com.tencent.wxcloudrun.openai.common.ChatConstant;
 import com.tencent.wxcloudrun.openai.model.ChatCompletionRequestBody;
@@ -28,11 +30,14 @@ public class OpenAIUtils
 {
     @Autowired
     ChatConfig config;
+    @Autowired
+    OpenaiAnswerMapper answerMapper;
+
     Logger logger = LoggerFactory.getLogger( OpenAIUtils.class);
 
     // 暂不考虑上下文
     @Async
-    public String invoke(String openId, String content) throws Exception
+    public String invoke(OpenaiAnswer answer, String openId, String content) throws Exception
     {
         ChatCompletionRequestBody request = new ChatCompletionRequestBody();
         request.setModel( ChatConstant.Model.GPT_35_TURBO );
@@ -52,17 +57,20 @@ public class OpenAIUtils
             String message =  result.getChoices().get( 0 ).getMessage().getContent();
             if (StrUtil.isNotEmpty(message))
             {
-                String wxMessage = JSONUtil.createObj()
-                        .putOnce( "touser", openId )
-                        .putOnce( "msgtype", WxConstant.MsgType.TEXT )
-                        .putOnce( "text", JSONUtil.createObj().putOnce( "content", message ) )
-                        .toString();
-                logger.info( "wechat request : " + wxMessage );
-                String wxResult = HttpRequest.post( "http://api.weixin.qq.com/cgi-bin/message/custom/send" )
-                        .body( wxMessage )
-                        .execute()
-                        .body();
-                logger.info( "wechat result : " + wxResult );
+                answer.setAnswer( message );
+                answerMapper.updateAnswer( answer );
+
+//                String wxMessage = JSONUtil.createObj()
+//                        .putOnce( "touser", openId )
+//                        .putOnce( "msgtype", WxConstant.MsgType.TEXT )
+//                        .putOnce( "text", JSONUtil.createObj().putOnce( "content", message ) )
+//                        .toString();
+//                logger.info( "wechat request : " + wxMessage );
+//                String wxResult = HttpRequest.post( "http://api.weixin.qq.com/cgi-bin/message/custom/send" )
+//                        .body( wxMessage )
+//                        .execute()
+//                        .body();
+//                logger.info( "wechat result : " + wxResult );
             }
             return "";
         }
