@@ -30,8 +30,10 @@ import java.util.Optional;
 @RestController
 public class WxMessageController
 {
-  final Logger logger;
+  @Autowired
+  OpenAIUtils openAIUtils;
 
+  final Logger logger;
   public WxMessageController() {
     this.logger = LoggerFactory.getLogger( WxMessageController.class);
   }
@@ -45,7 +47,7 @@ public class WxMessageController
     String result = "不支持的消息类型";
     if (WxConstant.MsgType.TEXT.equals( request.getMsgType()) )
     {
-      String aiResult = OpenAIUtils.invoke( request.getFromUserName(), request.getContent() );
+      String aiResult = openAIUtils.invoke( request.getFromUserName(), request.getContent() );
       WxMessageResult wxResult = new WxMessageResult();
       wxResult.setToUserName( request.getFromUserName() );
       wxResult.setFromUserName( request.getToUserName() );
