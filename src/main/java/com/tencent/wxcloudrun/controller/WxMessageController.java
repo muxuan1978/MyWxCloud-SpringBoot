@@ -51,6 +51,7 @@ public class WxMessageController
     logger.info("/wx/message result : {}", JSON.toJSONString(result));
 
     XStream xstream = new XStream();
+    xstream.alias( "xml", WxMessageResult.class );
     xstream.processAnnotations(WxMessageResult.class);
     xstream.setClassLoader(WxMessageResult.class.getClassLoader());
     return xstream.toXML(result);
