@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Optional;
 
 /**
@@ -25,18 +28,15 @@ import java.util.Optional;
 @RestController
 public class WxMessageController
 {
-
-  final CounterService counterService;
   final Logger logger;
 
-  public WxMessageController(@Autowired CounterService counterService) {
-    this.counterService = counterService;
+  public WxMessageController() {
     this.logger = LoggerFactory.getLogger( WxMessageController.class);
   }
 
-
   @PostMapping(value = "/wx/message")
-  public String create(@RequestBody String str) {
+  public void WxMessage(@RequestBody String str, HttpServletResponse response) throws IOException
+  {
     logger.info("/wx/message post request str : {}", str);
     WxMessageRequest request = JSONObject.parseObject( str, WxMessageRequest.class );
     logger.info("/wx/message post request obj : {}", JSON.toJSONString(request));
@@ -48,13 +48,17 @@ public class WxMessageController
     result.setMsgType("text");
     result.setContent("我收到了：" + request.getContent());
 
-    logger.info("/wx/message result : {}", JSON.toJSONString(result));
-
     XStream xstream = new XStream();
     xstream.alias( "xml", WxMessageResult.class );
     xstream.processAnnotations(WxMessageResult.class);
     xstream.setClassLoader(WxMessageResult.class.getClassLoader());
-    return xstream.toXML(result);
+    String xml = request.getContent().contains( "xml" ) ? xstream.toXML(result) : JSON.toJSONString( result );
+
+    logger.info("/wx/message result : {}", xml);
+    response.setCharacterEncoding("UTF-8");
+    PrintWriter out = response.getWriter();
+    out.print(xml);
+    out.close();
   }
   
 }
