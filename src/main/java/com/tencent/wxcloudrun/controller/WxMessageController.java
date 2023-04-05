@@ -8,6 +8,7 @@ import com.tencent.wxcloudrun.dto.WxMessageRequest;
 import com.tencent.wxcloudrun.dto.WxMessageResult;
 import com.tencent.wxcloudrun.model.Counter;
 import com.tencent.wxcloudrun.service.CounterService;
+import com.thoughtworks.xstream.XStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class WxMessageController
 
 
   @PostMapping(value = "/wx/message")
-  ApiResponse create(@RequestBody String str) {
+  public String create(@RequestBody String str) {
     logger.info("/wx/message post request str : {}", str);
     WxMessageRequest request = JSONObject.parseObject( str, WxMessageRequest.class );
     logger.info("/wx/message post request obj : {}", JSON.toJSONString(request));
@@ -47,7 +48,12 @@ public class WxMessageController
     result.setMsgType("text");
     result.setContent("我收到了：" + request.getContent());
 
-    return ApiResponse.ok(result);
+    logger.info("/wx/message result : {}", JSON.toJSONString(result));
+
+    XStream xstream = new XStream();
+    xstream.processAnnotations(WxMessageResult.class);
+    xstream.setClassLoader(WxMessageResult.class.getClassLoader());
+    return xstream.toXML(result);
   }
   
 }
