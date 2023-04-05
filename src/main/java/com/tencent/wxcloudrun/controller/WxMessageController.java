@@ -60,14 +60,12 @@ public class WxMessageController
                 List<OpenaiAnswer> list = answerMapper.selectUnReaded( request.getFromUserName() );
                 if (list != null && list.size() > 0)
                 {
-                    StringBuilder sb = new StringBuilder(  );
+                    resultMessage = "";
                     for (OpenaiAnswer answer : list)
                     {
-                        sb.append( "您的问题是：\n" + answer.getQuestion() + "\n\n");
-                        sb.append( "答案是：\n" + answer.getAnswer() + "\n" );
-                        sb.append( "---------------------------------------------------\n\n");
+                        resultMessage +=  "您的问题是：\n" + answer.getQuestion() + "\n";
+                        resultMessage +=  "我的答案是：\n" + answer.getAnswer() + "\n\n";
                     }
-                    resultMessage = sb.toString();
                     answerMapper.updateReadFlag( request.getFromUserName() );
                 }
                 else
@@ -82,7 +80,7 @@ public class WxMessageController
                 // 异步调用，先返回
                 String aiResult = openAIUtils.invoke( answer, request.getFromUserName(), request.getContent() );
 
-                resultMessage = "收到您的问题了，正在紧张思考，一会发【答案】会告诉您结果";
+                resultMessage = "收到您的问题了，正在紧张思考，一会点击【<a href=\"weixin://bizmsgmenu?msgmenucontent=答案&msgmenuid=1\">答案</a>】会告诉您结果";
             }
         }
 
