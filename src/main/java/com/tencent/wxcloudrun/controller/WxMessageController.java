@@ -60,12 +60,14 @@ public class WxMessageController
                 List<OpenaiAnswer> list = answerMapper.selectUnReaded( request.getFromUserName() );
                 if (list != null && list.size() > 0)
                 {
-                    resultMessage = "";
+                    StringBuilder sb = new StringBuilder(  );
                     for (OpenaiAnswer answer : list)
                     {
-                        resultMessage = resultMessage + "\n您的问题是：" + answer.getQuestion();
-                        resultMessage = resultMessage + "\n答案是：" + answer.getAnswer();
+                        sb.append( "您的问题是：\n" + answer.getQuestion() + "\n\n");
+                        sb.append( "答案是：\n" + answer.getAnswer() + "\n" );
+                        sb.append( "---------------------------------------------------\n\n");
                     }
+                    resultMessage = sb.toString();
                     answerMapper.updateReadFlag( request.getFromUserName() );
                 }
                 else
