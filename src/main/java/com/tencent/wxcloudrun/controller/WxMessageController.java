@@ -48,14 +48,15 @@ public class WxMessageController
     if (WxConstant.MsgType.TEXT.equals( request.getMsgType()) )
     {
       String aiResult = openAIUtils.invoke( request.getFromUserName(), request.getContent() );
-      WxMessageResult wxResult = new WxMessageResult();
-      wxResult.setToUserName( request.getFromUserName() );
-      wxResult.setFromUserName( request.getToUserName() );
-      wxResult.setCreateTime( System.currentTimeMillis() / 1000 );
-      wxResult.setMsgType( WxConstant.MsgType.TEXT );
-      wxResult.setContent( aiResult );
-
-      result = JSON.toJSONString( wxResult );
+//      WxMessageResult wxResult = new WxMessageResult();
+//      wxResult.setToUserName( request.getFromUserName() );
+//      wxResult.setFromUserName( request.getToUserName() );
+//      wxResult.setCreateTime( System.currentTimeMillis() / 1000 );
+//      wxResult.setMsgType( WxConstant.MsgType.TEXT );
+//      wxResult.setContent( aiResult );
+//
+//      result = JSON.toJSONString( wxResult );
+      result = "success";
     }
     logger.info( "/wx/message result : {}", result );
     // 输出

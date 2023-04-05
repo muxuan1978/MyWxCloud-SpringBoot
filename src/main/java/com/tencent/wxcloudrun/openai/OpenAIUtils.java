@@ -1,9 +1,13 @@
 package com.tencent.wxcloudrun.openai;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.tencent.wxcloudrun.config.WxConstant;
+import com.tencent.wxcloudrun.dto.WxMessageResult;
 import com.tencent.wxcloudrun.openai.common.ChatConfig;
 import com.tencent.wxcloudrun.openai.common.ChatConstant;
 import com.tencent.wxcloudrun.openai.model.ChatCompletionRequestBody;
@@ -12,6 +16,7 @@ import com.tencent.wxcloudrun.openai.model.ChatMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +31,7 @@ public class OpenAIUtils
     Logger logger = LoggerFactory.getLogger( OpenAIUtils.class);
 
     // 暂不考虑上下文
+    @Async
     public String invoke(String openId, String content) throws Exception
     {
         ChatCompletionRequestBody request = new ChatCompletionRequestBody();
@@ -43,7 +49,19 @@ public class OpenAIUtils
 
         ChatCompletionResponse result = JSONObject.parseObject( resultStr, ChatCompletionResponse.class );
         if (result != null && result.getChoices() != null && result.getChoices().size() > 0) {
-            return result.getChoices().get( 0 ).getMessage().getContent();
+            String message =  result.getChoices().get( 0 ).getMessage().getContent();
+            if (StrUtil.isNotEmpty(message))
+            {
+                String wxResult = JSONUtil.createObj()
+                        .putOnce( "touser", openId )
+                        .putOnce( "msgtype", WxConstant.MsgType.TEXT )
+                        .putOnce( "text", JSONUtil.createObj().putOnce( "content", message ) )
+                        .toString();
+                HttpRequest.post( "http://api.weixin.qq.com/cgi-bin/message/custom/send" )
+                        .body( wxResult )
+                        .execute();
+            }
+            return "";
         }
         return "没有得到回复";
     }
