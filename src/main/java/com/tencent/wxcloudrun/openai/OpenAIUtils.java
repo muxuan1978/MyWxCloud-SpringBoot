@@ -28,7 +28,10 @@ public class OpenAIUtils
         HttpRequest http = HttpUtil.createPost( baseUrl );
         http.header( "Content-Type", "application/json" );
         http.bearerAuth( apiKey );
+
+        System.out.println( "openai request : " + requestStr );
         String resultStr = http.body( requestStr ).execute().body();
+        System.out.println( "openai result : " + resultStr );
 
         ChatCompletionResponse result = JSONObject.parseObject( resultStr, ChatCompletionResponse.class );
         if (result != null && result.getChoices() != null && result.getChoices().size() > 0) {
