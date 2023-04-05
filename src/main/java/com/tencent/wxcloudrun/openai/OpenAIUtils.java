@@ -4,7 +4,6 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.tencent.wxcloudrun.openai.common.ChatConfig;
 import com.tencent.wxcloudrun.openai.common.ChatConstant;
 import com.tencent.wxcloudrun.openai.model.ChatCompletionRequestBody;
 import com.tencent.wxcloudrun.openai.model.ChatCompletionResponse;
@@ -16,7 +15,7 @@ import java.util.List;
 public class OpenAIUtils
 {
     private static String  baseUrl = "http://ec2-52-15-239-174.us-east-2.compute.amazonaws.com:9877";
-    private static String  apiKey = "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";
+    private static String  apiKey = "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";
 
     // 暂不考虑上下文
     public static String invoke(String openId, String content) throws Exception
@@ -32,7 +31,7 @@ public class OpenAIUtils
         String resultStr = http.body( requestStr ).execute().body();
 
         ChatCompletionResponse result = JSONObject.parseObject( resultStr, ChatCompletionResponse.class );
-        if (result != null && result.getChoices().size() > 0) {
+        if (result != null && result.getChoices() != null && result.getChoices().size() > 0) {
             return result.getChoices().get( 0 ).getMessage().getContent();
         }
         return "没有得到回复";
