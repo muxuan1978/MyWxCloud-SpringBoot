@@ -52,7 +52,7 @@ public class WxMessageController
         logger.info( "/wx/message post request str : {}", str );
 
         WxMessageRequest request = JSONObject.parseObject( str, WxMessageRequest.class );
-        String result = "不支持的消息类型";
+        String resultMessage = "不支持的消息类型";
         if (WxConstant.MsgType.TEXT.equals( request.getMsgType() ))
         {
             if (request.getContent().equals( "答案" ))
@@ -60,13 +60,17 @@ public class WxMessageController
                 List<OpenaiAnswer> list = answerMapper.selectUnReaded( request.getFromUserName() );
                 if (list != null && list.size() > 0)
                 {
-                    result = "";
+                    resultMessage = "";
                     for (OpenaiAnswer answer : list)
                     {
-                        result = result + "\n您的问题是：" + answer.getQuestion();
-                        result = result + "\n答案是：" + answer.getAnswer();
+                        resultMessage = resultMessage + "\n您的问题是：" + answer.getQuestion();
+                        resultMessage = resultMessage + "\n答案是：" + answer.getAnswer();
                     }
                     answerMapper.updateReadFlag( request.getFromUserName() );
+                }
+                else
+                {
+                    resultMessage = "抱歉，暂时没有答案，请继续提问，或者稍后再查询！";
                 }
             }
             else
@@ -76,15 +80,18 @@ public class WxMessageController
                 // 异步调用，先返回
                 String aiResult = openAIUtils.invoke( answer, request.getFromUserName(), request.getContent() );
 
-                WxMessageResult wxResult = new WxMessageResult();
-                wxResult.setToUserName( request.getFromUserName() );
-                wxResult.setFromUserName( request.getToUserName() );
-                wxResult.setCreateTime( System.currentTimeMillis() / 1000 );
-                wxResult.setMsgType( WxConstant.MsgType.TEXT );
-                wxResult.setContent( "收到您的问题了，正在紧张思考，一会发【答案】会告诉您结果" );
-                result = JSON.toJSONString( wxResult );
+                resultMessage = "收到您的问题了，正在紧张思考，一会发【答案】会告诉您结果";
             }
         }
+
+        WxMessageResult wxResult = new WxMessageResult();
+        wxResult.setToUserName( request.getFromUserName() );
+        wxResult.setFromUserName( request.getToUserName() );
+        wxResult.setCreateTime( System.currentTimeMillis() / 1000 );
+        wxResult.setMsgType( WxConstant.MsgType.TEXT );
+        wxResult.setContent( resultMessage );
+        String result = JSON.toJSONString( wxResult );
+
         logger.info( "/wx/message result : {}", result );
         // 输出
         response.setCharacterEncoding( "UTF-8" );
